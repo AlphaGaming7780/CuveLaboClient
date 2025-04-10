@@ -7,6 +7,9 @@ class MotorCommand(TypedDict):
 
 class CuveLaboAPI(object):
 
+    REGISTER_CLIENT = "RegisterClient"
+    UNREGISTER_CLIENT = "UnregisterClient"
+
     GET_BASE_DATA = "GetBaseData"
 
     SET_MOTOR_SPEED = "SetMotorSpeed"
@@ -23,20 +26,16 @@ class CuveLaboAPI(object):
     _NbCuve : int = -1
     _NbMotor : int = -1
 
-    _Ready : bool = False
-
     def __init__(self, serverIP : str, serverPort : str = "5000"):
-
+ 
         self._serverIP = serverIP
         self._serverPort = serverPort
-
-        self._Ready = self.GetBaseData()
         pass
 
     def FormatRequestLink(self, command : str) -> str:
         return f"http://{self._serverIP}:{self._serverPort}/{command}"
     
-    def Post(self, command : str, json : Any) -> bool:
+    def Post(self, command : str, json : Any = None) -> bool:
         response = requests.post(
             self.FormatRequestLink(command),
             json = json
@@ -60,6 +59,12 @@ class CuveLaboAPI(object):
 
         return response.json()
     
+    def RegisterClient(self, name : str) -> bool :
+        return self.Post(self.REGISTER_CLIENT, {"Name": name})
+
+    def UnregisterClient(self) -> bool :
+        return self.Post(self.UNREGISTER_CLIENT)
+
     def GetBaseData(self) -> bool:
         data = self.Get(self.GET_BASE_DATA)
 
