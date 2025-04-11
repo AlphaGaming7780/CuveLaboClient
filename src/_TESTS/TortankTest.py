@@ -40,4 +40,4 @@ if __name__ == "__main__":
         print(f"Motors speed : {tortank.GetMotor1Speed()}")
 
 
-    tortank.Run()  
+    tortank.Run("Tortank Test")  

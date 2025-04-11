@@ -11,25 +11,12 @@ if __name__ == "__main__":
 
     @carapuce.UpdateFunc()
     def func():
-        if( not carapuce.IsReady() ): 
-            print("Carapuce isn't ready")
+        waterLevel = carapuce.GetWaterLevel()
 
-        print(f"Water Level : {carapuce.GetWaterLevel()}")
-        carapuce.SetMotorSpeed(1)
-        print(f"Motor Speed : {carapuce.GetMotorSpeed()}")
-        time.sleep(5)
-        print(f"Water Level : {carapuce.GetWaterLevel()}")
-        carapuce.SetMotorSpeed(0)
-        print(f"Motor Speed : {carapuce.GetMotorSpeed()}")
+        if(waterLevel < 0.18):
+            carapuce.SetMotorSpeed(1)
+        else:
+            carapuce.SetMotorSpeed(0.82 - ( waterLevel - 0.18) * 15 / 0.82)
 
-        time.sleep(10)
 
-        print(f"Water Level : {carapuce._api.GetWaterLevels()}")
-        carapuce._api.SetMotorsSpeed( [ {"MotorIndex": 0, "MotorSpeed": 1} ] )
-        print(f"Motor Speed : {carapuce._api.GetMotorsSpeed()}")
-        time.sleep(5)
-        print(f"Water Level : {carapuce._api.GetWaterLevels()}")
-        carapuce._api.SetMotorsSpeed( [ {"MotorIndex": 0, "MotorSpeed": 0} ] )
-        print(f"Motor Speed : {carapuce._api.GetMotorsSpeed()}")
-
-    carapuce.Run()  
+    carapuce.Run("Carapuce Test")  

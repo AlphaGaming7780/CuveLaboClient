@@ -1,5 +1,8 @@
+import json
+import threading
 from typing import Any, List, TypedDict
 import requests
+import sseclient
 
 class MotorCommand(TypedDict):
     MotorIndex: int
@@ -7,8 +10,45 @@ class MotorCommand(TypedDict):
 
 class CuveLaboAPI(object):
 
+    class SSEListenerThread(threading.Thread):
+        def __init__(self, url):
+            super().__init__()
+            self.url = url
+            self._running = threading.Event()
+            self._running.set()
+            self.session = requests.Session()
+            self.data = None
+
+        def stop(self):
+            self._running.clear()
+            self.session.close()
+
+        def run(self):
+            try:
+                while(True):
+                # with self.session.get(self.url, stream=True) as response:
+                    # client = sseclient.SSEClient(response)
+                    client = sseclient.SSEClient(self.url)
+                    for event in client:
+                        if not self._running.is_set():
+                            print("[SSE] Arrêt du thread demandé.")
+                            return
+                        try:
+                            self.data = json.loads(event.data)  # <- ici le fix
+                            print("[SSE] Donnée reçue :", self.data)
+                        except json.JSONDecodeError as e:
+                            print("[SSE] Erreur de parsing JSON :", e)
+            except Exception as e:
+                print("[SSE] Erreur :", e)
+                # print(response.headers)
+
+
     REGISTER_CLIENT = "RegisterClient"
     UNREGISTER_CLIENT = "UnregisterClient"
+
+    SIGNAL_CLIENT_IS_STILL_ACTIVE = "ClientIsStillActive"
+
+    CLIENT_DATA_UPDATE = "ClientsDataUpdate"
 
     GET_BASE_DATA = "GetBaseData"
 
@@ -31,6 +71,14 @@ class CuveLaboAPI(object):
         self._serverIP = serverIP
         self._serverPort = serverPort
         pass
+
+    def CreateClientDataUpdateStream(self) -> SSEListenerThread:
+        return self.SSEListenerThread(self.FormatRequestLink(self.CLIENT_DATA_UPDATE))
+    
+    def KillClientDataUpdateStream(self, sse_thread : SSEListenerThread ):
+        if(not sse_thread.is_alive()): return
+        sse_thread.stop()
+        # sse_thread.join()
 
     def FormatRequestLink(self, command : str) -> str:
         return f"http://{self._serverIP}:{self._serverPort}/{command}"
@@ -64,6 +112,9 @@ class CuveLaboAPI(object):
 
     def UnregisterClient(self) -> bool :
         return self.Post(self.UNREGISTER_CLIENT)
+
+    def SignalClientIsStillActive(self):
+        return self.Post(self.SIGNAL_CLIENT_IS_STILL_ACTIVE)
 
     def GetBaseData(self) -> bool:
         data = self.Get(self.GET_BASE_DATA)
