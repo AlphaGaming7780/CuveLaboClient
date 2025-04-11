@@ -42,8 +42,8 @@ class CuveLaboClient(object):
         try:
             self._updateFunc()
 
-        except:
-            print("ERROR")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
 
         while( not self._api.UnregisterClient() ):
             pass

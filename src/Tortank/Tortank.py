@@ -1,18 +1,10 @@
-import time
 from typing import List
-
-# TESTING
-if __name__ == "__main__":
-    import sys
-    import os
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from Common.CuveLaboAPI import MotorCommand
 from Common.CuveLaboClient import CuveLaboClient
 
 class Tortank(CuveLaboClient) : 
 
-    def __init__(self, serverIP : str = "10.20.30.140", serverPort : str = "5000"):
+    def __init__(self, serverIP : str = "10.20.30.142", serverPort : str = "5000"):
         super().__init__(serverIP, serverPort)
         pass
 
@@ -62,8 +54,5 @@ class Tortank(CuveLaboClient) :
         return self._api.GetWaterLevels()
 
 
-# TESTING
-if __name__ == "__main__":
 
-    tortank : Tortank = Tortank()
 

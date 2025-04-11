@@ -32,4 +32,4 @@ if __name__ == "__main__":
         carapuce._api.SetMotorsSpeed( [ {"MotorIndex": 0, "MotorSpeed": 0} ] )
         print(f"Motor Speed : {carapuce._api.GetMotorsSpeed()}")
 
-    carapuce.Run()
+    carapuce.Run()  
