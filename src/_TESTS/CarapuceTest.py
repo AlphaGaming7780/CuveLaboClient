@@ -9,8 +9,17 @@ if __name__ == "__main__":
 
     carapuce : Carapuce = Carapuce()
 
+    # @carapuce.UpdateFunc()
+    def funcTest():
+        waterLevel = carapuce.GetWaterLevel()
+
+        if(waterLevel < 0.18):
+            carapuce.SetMotorSpeed(1)
+        else:
+            carapuce.SetMotorSpeed(0.82 - ( waterLevel - 0.18) * 15 / 0.82)
+
     @carapuce.UpdateFunc()
-    def func():
+    def funcPID():
         waterLevel = carapuce.GetWaterLevel()
 
         if(waterLevel < 0.18):
