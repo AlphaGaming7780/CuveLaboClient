@@ -5,15 +5,20 @@ if __name__ == "__main__":
     import os
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-    from Tortank.Tortank import Tortank, PIDController3Tanks
+    from Tortank.Tortank import Tortank, PIDController3Tanks, PIDController2Tanks, PIDController2TanksAntiWindup
 
     tortank : Tortank = Tortank()
 
-    controller = PIDController3Tanks(
-        Kp=1.0,
-        Ki=0.1,
-        Kd=0.01,
-        dt=1,
+    controller = PIDController2TanksAntiWindup(
+        Kp1 = 1,
+        Ki1 = 0.1,
+        Kd1 = 0.01,
+        Kp2 = 1,
+        Ki2 = 0.1,
+        Kd2 = 0.01,
+        dt = 1,
+        Qmin = 0.0,
+        Qmax = 1.0
     )
 
     # @tortank.UpdateFunc()
@@ -51,7 +56,7 @@ if __name__ == "__main__":
         # À chaque itération de simulation ou mesure :
         h1, h2, h3 = tortank.GetWaterLevels()
         print(f"Water levels : {h1}, {h2}, {h3}")
-        Q1_speed, Q2_speed = controller.update([h1, h2, h3])
+        Q1_speed, Q2_speed = controller.update(h1*60, h3*60, 30, 30)  # Consigne de hauteur pour les cuves 1 et 2
         print(f"Motor speeds : {Q1_speed}, {Q2_speed}")
         tortank.SetMotorsSpeed([{"MotorIndex": 0, "MotorSpeed": Q1_speed}, {"MotorIndex": 1, "MotorSpeed": Q2_speed}])
         time.sleep(1)

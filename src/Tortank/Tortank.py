@@ -161,4 +161,132 @@ class PIDController3Tanks:
     #     return motor1, motor2
 
 
+class PIDController2Tanks:
+    def __init__(self, Kp1, Ki1, Kd1, Kp2, Ki2, Kd2, dt, Qmin=0.0, Qmax=1.0):
+        # Constantes PID pour la cuve 1
+        self.Kp1 = Kp1
+        self.Ki1 = Ki1
+        self.Kd1 = Kd1
+
+        # Constantes PID pour la cuve 2
+        self.Kp2 = Kp2
+        self.Ki2 = Ki2
+        self.Kd2 = Kd2
+
+        # Pas de temps
+        self.dt = dt
+
+        # Saturation
+        self.Qmin = Qmin
+        self.Qmax = Qmax
+
+        # États internes pour la cuve 1
+        self.integral_h1 = 0.0
+        self.previous_error_h1 = 0.0
+
+        # États internes pour la cuve 2
+        self.integral_h2 = 0.0
+        self.previous_error_h2 = 0.0
+
+    def update(self, h1_k, h2_k, h1_setpoint, h2_setpoint):
+        """
+        Met à jour les débits Q1 et Q2 pour maintenir les hauteurs des cuves 1 et 2 à leur consigne.
+
+        :param h1_k: Hauteur actuelle de la cuve 1
+        :param h2_k: Hauteur actuelle de la cuve 2
+        :param h1_setpoint: Hauteur désirée pour la cuve 1
+        :param h2_setpoint: Hauteur désirée pour la cuve 2
+        :return: Q1 (pour moteur 1), Q2 (pour moteur 2)
+        """
+
+        # PID pour la cuve 1
+        error_h1 = h1_setpoint - h1_k
+        self.integral_h1 += error_h1 * self.dt
+        derivative_h1 = (error_h1 - self.previous_error_h1) / self.dt
+
+        Q1 = self.Kp1 * error_h1 + self.Ki1 * self.integral_h1 + self.Kd1 * derivative_h1
+        Q1 = max(min(Q1, self.Qmax), self.Qmin)
+        self.previous_error_h1 = error_h1
+
+        # PID pour la cuve 2
+        error_h2 = h2_setpoint - h2_k
+        self.integral_h2 += error_h2 * self.dt
+        derivative_h2 = (error_h2 - self.previous_error_h2) / self.dt
+
+        Q2 = self.Kp2 * error_h2 + self.Ki2 * self.integral_h2 + self.Kd2 * derivative_h2
+        Q2 = max(min(Q2, self.Qmax), self.Qmin)
+        self.previous_error_h2 = error_h2
+
+        return Q1, Q2  # Q1 → moteur cuve 1, Q2 → moteur cuve 2
+    
+class PIDController2TanksAntiWindup:
+    def __init__(self, Kp1, Ki1, Kd1, Kp2, Ki2, Kd2, dt, Qmin=0.0, Qmax=1.0):
+        # Constantes PID pour cuve 1
+        self.Kp1 = Kp1
+        self.Ki1 = Ki1
+        self.Kd1 = Kd1
+
+        # Constantes PID pour cuve 2
+        self.Kp2 = Kp2
+        self.Ki2 = Ki2
+        self.Kd2 = Kd2
+
+        # Pas de temps
+        self.dt = dt
+
+        # Bornes de saturation
+        self.Qmin = Qmin
+        self.Qmax = Qmax
+
+        # États internes pour la cuve 1
+        self.integral_h1 = 0.0
+        self.previous_error_h1 = 0.0
+
+        # États internes pour la cuve 2
+        self.integral_h2 = 0.0
+        self.previous_error_h2 = 0.0
+
+    def update(self, h1_k, h2_k, h1_setpoint, h2_setpoint):
+        """
+        Met à jour les débits Q1 et Q2 pour les cuves 1 et 2 avec anti-windup.
+
+        :param h1_k: Hauteur actuelle cuve 1
+        :param h2_k: Hauteur actuelle cuve 2
+        :param h1_setpoint: Consigne cuve 1
+        :param h2_setpoint: Consigne cuve 2
+        :return: Q1 (moteur cuve 1), Q2 (moteur cuve 2)
+        """
+
+        # === PID cuve 1 ===
+        error_h1 = h1_setpoint - h1_k
+        self.integral_h1 += error_h1 * self.dt
+        derivative_h1 = (error_h1 - self.previous_error_h1) / self.dt
+
+        # Calcul du signal de commande non saturé
+        Q1_unsat = self.Kp1 * error_h1 + self.Ki1 * self.integral_h1 + self.Kd1 * derivative_h1
+
+        # Saturation de la commande
+        Q1 = max(self.Qmin, min(self.Qmax, Q1_unsat))
+
+        # Anti-windup : ajustement de l'intégrale si saturation
+        if Q1 != Q1_unsat and self.Ki1 != 0:
+            self.integral_h1 += (Q1 - Q1_unsat) / self.Ki1
+
+        # Mémorisation de l’erreur pour le calcul du dérivé au prochain appel
+        self.previous_error_h1 = error_h1
+
+        # === PID cuve 2 ===
+        error_h2 = h2_setpoint - h2_k
+        self.integral_h2 += error_h2 * self.dt
+        derivative_h2 = (error_h2 - self.previous_error_h2) / self.dt
+
+        Q2_unsat = self.Kp2 * error_h2 + self.Ki2 * self.integral_h2 + self.Kd2 * derivative_h2
+        Q2 = max(self.Qmin, min(self.Qmax, Q2_unsat))
+
+        if Q2 != Q2_unsat and self.Ki2 != 0:
+            self.integral_h2 += (Q2 - Q2_unsat) / self.Ki2
+
+        self.previous_error_h2 = error_h2
+
+        return Q1, Q2  # Q1 = pour moteur cuve 1 ; Q2 = pour moteur cuve 2
 

@@ -96,9 +96,9 @@ class CuveLaboClient(object):
 
             if( not self._api.RegisterClient(name)): return
 
-            while( self._sseThread.data == None or self._sseThread.data["ActiveClient"] != self._Ip ):
+            while( self._sseThread.data == None or self._sseThread.data["ActiveClient"]["Ip"] != self._Ip ):
                 data = None
-                if(self._sseThread.data != None): data = self._sseThreadself._sseThread.data["ActiveClient"]
+                if(self._sseThread.data != None): data = self._sseThread.data["ActiveClient"]
                 print(f"Waiting the authorization from the server to run. Current Client : {data}")
                 if( not self._api.SignalClientIsStillActive()):
                     self.End()
@@ -110,7 +110,7 @@ class CuveLaboClient(object):
 
             self._updateThread.start()
 
-            while(self._sseThread.data["ActiveClient"] == self._Ip and not self.ShouldEnd) :
+            while(self._sseThread.data["ActiveClient"]["Ip"] == self._Ip and not self.ShouldEnd ) :
                 if(not self._api.SignalClientIsStillActive()):
                     self.End()
                 time.sleep(1)
