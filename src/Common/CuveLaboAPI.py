@@ -95,7 +95,7 @@ class CuveLaboAPI(object):
         return True
 
     
-    def Get(self, command: str, params: Any = None) -> Any:
+    def Get(self, command: str, params: Any = None) -> Any | None:
         response = requests.get(
             self.FormatRequestLink(command),
             params=params
@@ -134,18 +134,18 @@ class CuveLaboAPI(object):
     def SetMotorsSpeed(self, motorsCommand : List[MotorCommand] ) -> bool : 
         return self.Post(self.SET_MOTORS_SPEED, motorsCommand)
 
-    def GetMotorSpeed(self, motorIdx : int) -> float: 
+    def GetMotorSpeed(self, motorIdx : int) -> float | None: 
         if(motorIdx < 0 or motorIdx >= self._NbMotor): return -1
         return self.Get(self.GET_MOTOR_SPEED, {"MotorIndex": motorIdx})
     
-    def GetMotorsSpeed(self) -> List[float]: 
+    def GetMotorsSpeed(self) -> List[float] | None: 
         return self.Get(self.GET_MOTORS_SPEED)
     
-    def GetWaterLevel(self, cuveIndex : int) -> float:
+    def GetWaterLevel(self, cuveIndex : int) -> float | None:
         if(cuveIndex < 0 or cuveIndex >= self._NbCuve): return -1
         return self.Get(self.GET_WATER_LEVEL, {"CuveIndex": cuveIndex})
 
-    def GetWaterLevels(self) -> List[float]:
+    def GetWaterLevels(self) -> List[float] | None:
         return self.Get(self.GET_WATER_LEVELS)
         
     

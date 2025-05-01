@@ -10,26 +10,26 @@ class Tortank(CuveLaboClient) :
 
     def SetMotor1Speed(self, speed : float) -> bool:
 
-        if ( speed < 0 ) : speed = 0
-        if ( speed > 1 ) : speed = 1
+        if ( speed < 0 or speed > 1 ) : 
+            print("SetMotor2Speed : speed must be a float between 0 and 1.")
+            return False
 
         return self._api.SetMotorSpeed(0, speed)
 
     def SetMotor2Speed(self, speed : float) -> bool:
 
-        if ( speed < 0 ) : speed = 0
-        if ( speed > 1 ) : speed = 1
+        if ( speed < 0 or speed > 1 ) : 
+            print("SetMotor2Speed : speed must be a float between 0 and 1.")
+            return False
 
         return self._api.SetMotorSpeed(1, speed)
 
-    def SetMotor3Speed(self, speed : float) -> bool :
-
-        if ( speed < 0 ) : speed = 0
-        if ( speed > 1 ) : speed = 1
-
-        return self._api.SetMotorSpeed(2, speed)
-
     def SetMotorsSpeed(self, motorsCommand : List[MotorCommand]) -> bool:
+
+        if(len(motorsCommand) != 2):
+            print("SetMotorsSpeed : motorsCommand must be a list of 2 float.")
+            return False
+
         return self._api.SetMotorsSpeed(motorsCommand)
 
     def GetMotor1Speed(self) -> float:
@@ -53,6 +53,10 @@ class Tortank(CuveLaboClient) :
     def GetWaterLevels(self) -> List[float]:
         return self._api.GetWaterLevels()
 
+
+# Testing stuff, need to be verified and improved or maybe removed.
+# But I think it's a good idea to have a built in PID controller.
+# Carapuce doesn't have one.
 
 class PIDController3Tanks:
     def __init__(self, Kp, Ki, Kd, setpoints=(0.5, 0.5, 0.5), dt=0.1):
@@ -159,7 +163,6 @@ class PIDController3Tanks:
     #     motor2 = min(max(motor2, 0), 1)
 
     #     return motor1, motor2
-
 
 class PIDController2Tanks:
     def __init__(self, Kp1, Ki1, Kd1, Kp2, Ki2, Kd2, dt, Qmin=0.0, Qmax=1.0):

@@ -4,21 +4,19 @@ build-backend = "hatchling.build"
 
 [project]
 name = "CuveLaboClient"
-version = "0.1.0"
+version = "1.0.0"
 authors = [
-  	{ name="Trioen Loïc", email="trioen.loic@gmail.com" },
-  	{ name="Mathys Deboever", email="" },
-  	{ name="Samy", email="" },
+  	{ name="Trioen Loïc", email="trioen.loic@gmail.com" }
 ]
-description = "A small example package"
+description = "Client Side for the CuveLabo"
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-license = "MIT"
-license-files = ["LICEN[CS]E*"]
+# license = "MIT"
+# license-files = ["LICEN[CS]E*"]
 dependencies = [
 	'requests',
   'sseclient'
@@ -34,7 +32,7 @@ packages = [
   "src/Common"
 ]
 
-[project.urls]
-Repository = "https://github.com/AlphaGaming7780/TortankWebServer.git"
-Homepage = "https://github.com/AlphaGaming7780/TortankWebServer"
-Issues = "https://github.com/AlphaGaming7780/TortankWebServer/issues"
+# [project.urls]
+# Repository = "https://github.com/AlphaGaming7780/TortankWebServer.git"
+# Homepage = "https://github.com/AlphaGaming7780/TortankWebServer"
+# Issues = "https://github.com/AlphaGaming7780/TortankWebServer/issues"
